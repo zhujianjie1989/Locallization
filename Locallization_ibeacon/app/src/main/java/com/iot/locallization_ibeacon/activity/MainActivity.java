@@ -19,6 +19,7 @@ import java.io.File;
 
 public class MainActivity extends Activity {
 
+    private ScanServiceConnection sc;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -33,8 +34,9 @@ public class MainActivity extends Activity {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                sc= new ScanServiceConnection();
                 Intent service = new Intent(MainActivity.this,ScanBluetoothService.class);
-                bindService(service,new ScanServiceConnection(),BIND_AUTO_CREATE);
+                bindService(service,sc,BIND_AUTO_CREATE);
             }
         }).start();
 
@@ -45,7 +47,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(new ScanServiceConnection());
+        unbindService(sc);
         Log.e("localliziton","onDestroy");
     }
 

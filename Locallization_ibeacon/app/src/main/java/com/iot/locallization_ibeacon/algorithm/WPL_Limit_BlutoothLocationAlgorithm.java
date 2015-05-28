@@ -4,8 +4,8 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.iot.locallization_ibeacon.pojo.BluetoothSensor;
 import com.iot.locallization_ibeacon.activity.DemoActivity;
+import com.iot.locallization_ibeacon.pojo.BluetoothSensor;
 import com.iot.locallization_ibeacon.pojo.GlabalData;
 
 import java.util.ArrayList;
@@ -25,14 +25,14 @@ public class WPL_Limit_BlutoothLocationAlgorithm extends BluetoothLocalizationAl
 	public void DoLocalization( )
 		{
 			Double rssi_max=-40.0;
-			Double rssi_min=-100.0;
+			Double rssi_min=-150.0;
 			Double sumDef=0.0;
-			double x=0;
-			double y=0;
+			double x= 0;
+			double y =0;
 			List<BluetoothSensor> sensorList = SortWifiSignal();
-			DemoActivity.logstring =sensorList.get(0).minor+","+(sensorList.get(0).rssi-sensorList.get(0).max_rssi)+":";
-			DemoActivity.logstring +=sensorList.get(1).minor+","+(sensorList.get(1).rssi-sensorList.get(1).max_rssi)+":";
-			DemoActivity.logstring +=sensorList.get(2).minor+","+(sensorList.get(2).rssi-sensorList.get(2).max_rssi)+"";
+			DemoActivity.logstring =" minor:"+sensorList.get(0).minor+"rssi:"+(sensorList.get(0).rssi-sensorList.get(0).max_rssi)+" ";
+			DemoActivity.logstring +=" minor:"+sensorList.get(1).minor+"rssi:"+(sensorList.get(1).rssi-sensorList.get(1).max_rssi)+" ";
+			DemoActivity.logstring +=" minor:"+sensorList.get(2).minor+"rssi:"+(sensorList.get(2).rssi-sensorList.get(2).max_rssi)+"";
 
 			handler.sendMessage(new Message());
 
@@ -48,6 +48,10 @@ public class WPL_Limit_BlutoothLocationAlgorithm extends BluetoothLocalizationAl
 			
 			for (int i = 0; i < len; i++) {
 				BluetoothSensor sensor = sensorList.get(i);
+
+				if (sensor.rssi <= -100)
+					continue;
+
 				rssi_max = sensor.max_rssi*1.0;
 
 				Double tmprssi = rssi_max-sensor.rssi;
@@ -67,7 +71,7 @@ public class WPL_Limit_BlutoothLocationAlgorithm extends BluetoothLocalizationAl
 			{
 				//Log.e("timeeeee",sensorList.get(i).minor+"   "+(time.getTime()-sensorList.get(i).updateTime.getTime())/1000+"");
 				if ((time.getTime()-sensorList.get(i).updateTime)/1000 > 6)
-					sensorList.get(i).rssi = -100;
+					sensorList.get(i).rssi = -150;
 			}
 
 		}

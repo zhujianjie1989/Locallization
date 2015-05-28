@@ -210,6 +210,19 @@ public class Tools extends  Activity {
         return new String(hexChars);
     }
 
+    public static BluetoothSensor getSensorByMajorandMinor(String major ,String minor){
+        BluetoothSensor  max_sensor=null;
+        Iterator<String> keyite =  GlabalData.blutoothSensorList.keySet().iterator();
+        while (keyite.hasNext()){
+            String key = keyite.next();
+            BluetoothSensor sensor = GlabalData.blutoothSensorList.get(key);
+            if (sensor.major.equals(major)&&sensor.minor.equals(minor)){
+                max_sensor = sensor;
+            }
+        }
+        return  max_sensor;
+    }
+
 
     public static BluetoothSensor getMaxRssiSensor(Hashtable<String, BluetoothSensor> list){
         BluetoothSensor  max_sensor=null;

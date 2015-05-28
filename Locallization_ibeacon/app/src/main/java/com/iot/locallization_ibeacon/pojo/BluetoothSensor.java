@@ -23,7 +23,7 @@ public class BluetoothSensor {
 	public List<Line> lines = new ArrayList<Line>();
 	public long updateTime;
 
-	private final  int length =3 ;
+	private final  int length =2 ;
 	public int[] rssis = new int[length];
 	public int pos = 0;
 
@@ -31,7 +31,7 @@ public class BluetoothSensor {
 
 		for (int i = 0 ;i < length;i++)
 		{
-			rssis[i]=-20;
+			rssis[i]=-100;
 		}
 	}
 
@@ -70,7 +70,7 @@ public class BluetoothSensor {
 	}
 
 	public String toString(){
-		return   this.ID+","+this.major+","+this.minor+","+this.rssi+","+this.position.latitude+","+ this.position.longitude+","+this.floor+""+this.max_rssi;
+		return   this.ID+","+this.major+","+this.minor+","+this.rssi+","+this.position.latitude+","+ this.position.longitude+","+this.floor+","+this.max_rssi;
 	}
 
 }

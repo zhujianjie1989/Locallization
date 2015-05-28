@@ -1,10 +1,10 @@
 package com.iot.locallization_ibeacon.activity;
 
-import android.bluetooth.BluetoothAdapter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -36,16 +36,12 @@ public class Get_LanLng_Activity extends ActionBarActivity {
     private GoogleMap map;
     private Hashtable<String,BluetoothSensor> markerList = new Hashtable<String,BluetoothSensor>();
     private Marker marker;
-
     private int markID=0;
-    private String max_major="0";
-    private String max_minor="0";
-    private int max_rssi=-1000000;
-    private boolean bluetooth = true;
-    private BluetoothAdapter mBluetoothAdapter;
     private final Timer timer = new Timer();
     private TimerTask task;
     private boolean addLine_flag=false;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,10 +82,19 @@ public class Get_LanLng_Activity extends ActionBarActivity {
         @Override
         public void handleMessage(Message msg) {
             TextView log = (TextView) findViewById( R.id.TV_Log);
-            BluetoothSensor max_sensor = Tools.getMaxRssiSensor(GlabalData.Templist);
-            if (max_sensor==null)
-                return;
-            log.setText("max_major:" + max_sensor.major + " max_minor:" + max_sensor.minor + " maxrssi:" + max_sensor.rssi);
+            if (marker!=null){
+                BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
+                BluetoothSensor max_sensor = Tools.getSensorByMajorandMinor(sensor.major,sensor.minor);
+                if (max_sensor==null)
+                    return;
+                log.setText("major:" + max_sensor.major + " minor:" + max_sensor.minor + " rssi:" + max_sensor.rssi);
+            }else{
+                BluetoothSensor max_sensor = Tools.getMaxRssiSensor(GlabalData.Templist);
+                if (max_sensor==null)
+                    return;
+                log.setText("max_major:" + max_sensor.major + " max_minor:" + max_sensor.minor + " maxrssi:" + max_sensor.rssi);
+            }
+
 
             super.handleMessage(msg);
         }
@@ -134,23 +139,34 @@ public class Get_LanLng_Activity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
 
-                BluetoothSensor max_sensor = Tools.getMaxRssiSensor( GlabalData.Templist);
-                BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
-                GlabalData.blutoothSensorList.remove(sensor.ID);
+                TextView log = (TextView) findViewById( R.id.TV_Log);
+                if (marker!=null){
+                    BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
+                    BluetoothSensor max_sensor = Tools.getSensorByMajorandMinor(sensor.major,sensor.minor);
+                    if (max_sensor==null)
+                        return;
+                    log.setText("major:" + max_sensor.major + " minor:" + max_sensor.minor + " rssi:" + max_sensor.rssi);
+                    //BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
+                    GlabalData.blutoothSensorList.remove(sensor.ID);
 
-                sensor.major = max_sensor.major;
-                sensor.minor = max_sensor.minor;
-                sensor.max_rssi = max_sensor.rssi;
-                sensor.ID = "major:" +  sensor.major + " minor:" +  sensor.minor;
-                sensor.markerOptions.title(sensor.ID);
-                sensor.markerOptions.snippet("x:" + Tools.formatFloat(sensor.position.latitude) + " y:" + Tools.formatFloat(sensor.position.longitude)+"\n"
-                        +"max_rssi:" + sensor.max_rssi);
+                    sensor.major = max_sensor.major;
+                    sensor.minor = max_sensor.minor;
+                    sensor.max_rssi = max_sensor.rssi;
+                    sensor.ID = "major:" +  sensor.major + " minor:" +  sensor.minor;
+                    sensor.markerOptions.title(sensor.ID);
+                    sensor.markerOptions.snippet("x:" + Tools.formatFloat(sensor.position.latitude) + " y:" + Tools.formatFloat(sensor.position.longitude)+"\n"
+                            +"max_rssi:" + sensor.max_rssi);
 
-                marker.remove();
-                marker =  map.addMarker(sensor.markerOptions);
-                marker.showInfoWindow();
+                    marker.remove();
+                    marker =  map.addMarker(sensor.markerOptions);
+                    marker.showInfoWindow();
 
-                GlabalData.blutoothSensorList.put(sensor.ID, sensor);
+                    GlabalData.blutoothSensorList.put(sensor.ID, sensor);
+
+                }
+
+              //  BluetoothSensor max_sensor = Tools.getMaxRssiSensor( GlabalData.Templist);
+
             }
         });
 
@@ -167,18 +183,26 @@ public class Get_LanLng_Activity extends ActionBarActivity {
     }
     private void initMap(){
         map=((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
+        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                marker= null;
+                Log.e("initMap","onMapClick");
+            }
+        });
+
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
 
-                if (addLine_flag && Get_LanLng_Activity.this.marker!=null){
+                if (addLine_flag && Get_LanLng_Activity.this.marker != null) {
                     PolylineOptions rectOptions = new PolylineOptions().add(Get_LanLng_Activity.this.marker.getPosition()).add(marker.getPosition());
                     map.addPolyline(rectOptions);
                     BluetoothSensor sensor1 = markerList.get(Get_LanLng_Activity.this.marker.getTitle());
                     BluetoothSensor sensor2 = markerList.get(marker.getTitle());
-                    if (!sensor1.containLine(sensor2.major,sensor2.minor)){
-                        sensor1.lines.add(new Line(sensor2.major,sensor2.minor,0));
-                        sensor2.lines.add(new Line(sensor1.major,sensor1.minor,0));
+                    if (!sensor1.containLine(sensor2.major, sensor2.minor)) {
+                        sensor1.lines.add(new Line(sensor2.major, sensor2.minor, 0));
+                        sensor2.lines.add(new Line(sensor1.major, sensor1.minor, 0));
                     }
 
                 }
