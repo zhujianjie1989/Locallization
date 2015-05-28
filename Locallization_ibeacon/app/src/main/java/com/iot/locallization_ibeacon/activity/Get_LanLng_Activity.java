@@ -1,4 +1,4 @@
-package com.iot.locallization_ibeacon;
+package com.iot.locallization_ibeacon.activity;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -22,6 +22,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.iot.locallization_ibeacon.R;
+import com.iot.locallization_ibeacon.pojo.BluetoothSensor;
+import com.iot.locallization_ibeacon.pojo.GlabalData;
+import com.iot.locallization_ibeacon.pojo.Line;
+import com.iot.locallization_ibeacon.tools.Tools;
 
 import java.io.File;
 import java.util.Hashtable;
@@ -88,7 +93,7 @@ public class Get_LanLng_Activity extends ActionBarActivity implements BluetoothA
         @Override
         public void handleMessage(Message msg) {
             TextView log = (TextView) findViewById( R.id.TV_Log);
-            BluetoothSensor max_sensor = Tools.getMaxRssiSensor( GlabalData.Templist);
+            BluetoothSensor max_sensor = Tools.getMaxRssiSensor(GlabalData.Templist);
             if (max_sensor==null)
                 return;
 

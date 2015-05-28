@@ -1,4 +1,4 @@
-package com.iot.locallization_ibeacon;
+package com.iot.locallization_ibeacon.pojo;
 
 import android.os.Environment;
 

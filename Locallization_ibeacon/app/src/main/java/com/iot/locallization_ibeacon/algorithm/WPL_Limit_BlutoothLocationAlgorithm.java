@@ -1,9 +1,12 @@
-package com.iot.locallization_ibeacon;
+package com.iot.locallization_ibeacon.algorithm;
 
 import android.os.Handler;
 import android.os.Message;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.iot.locallization_ibeacon.pojo.BluetoothSensor;
+import com.iot.locallization_ibeacon.activity.DemoActivity;
+import com.iot.locallization_ibeacon.pojo.GlabalData;
 
 import java.util.ArrayList;
 import java.util.Date;

@@ -1,4 +1,4 @@
-package com.iot.locallization_ibeacon;
+package com.iot.locallization_ibeacon.activity;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -27,6 +27,11 @@ import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.iot.locallization_ibeacon.R;
+import com.iot.locallization_ibeacon.algorithm.WPL_Limit_BlutoothLocationAlgorithm;
+import com.iot.locallization_ibeacon.pojo.BluetoothSensor;
+import com.iot.locallization_ibeacon.pojo.GlabalData;
+import com.iot.locallization_ibeacon.tools.Tools;
 
 import java.io.File;
 import java.util.Date;

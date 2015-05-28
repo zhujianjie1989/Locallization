@@ -1,4 +1,4 @@
-package com.iot.locallization_ibeacon;
+package com.iot.locallization_ibeacon.pojo;
 
 
 import com.google.android.gms.maps.model.LatLng;

@@ -1,4 +1,4 @@
-package com.iot.locallization_ibeacon;
+package com.iot.locallization_ibeacon.tools;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -9,6 +9,9 @@ import android.location.LocationManager;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.iot.locallization_ibeacon.pojo.BluetoothSensor;
+import com.iot.locallization_ibeacon.pojo.GlabalData;
+import com.iot.locallization_ibeacon.pojo.Line;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

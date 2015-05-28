@@ -31,7 +31,7 @@
             android:value="AIzaSyCizATExEYpjsiv6JgLQqqLBMOmQlVc0Lo" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,11 +40,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Get_LanLng_Activity"
+            android:name=".activity.Get_LanLng_Activity"
             android:label="@string/title_activity_get__lan_lng_" >
         </activity>
         <activity
-            android:name=".DemoActivity"
+            android:name=".activity.DemoActivity"
             android:label="@string/title_activity_demo" >
         </activity>
     </application>
