@@ -101,8 +101,6 @@ public class Tools extends  Activity {
                     }
                 }
 
-
-
                 sensor.markerOptions.title(sensor.ID).draggable(true);
                 sensor.markerOptions.position(sensor.position);
                 sensor.markerOptions.snippet("x:" + sensor.position.latitude + "y:" + sensor.position.latitude + "\n max_rssi:" + sensor.max_rssi);
@@ -199,10 +197,6 @@ public class Tools extends  Activity {
             BluetoothSensor beacon = new BluetoothSensor(ibeaconName, uuid,mac,major+"",minor+"",rssi,txPower);
 
             return  beacon;
-     //   }
-        //return  null;
-
-
 
     }
     static final char[] hexArray = "0123456789ABCDEF".toCharArray();

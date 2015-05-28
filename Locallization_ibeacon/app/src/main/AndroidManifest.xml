@@ -47,6 +47,12 @@
             android:name=".activity.DemoActivity"
             android:label="@string/title_activity_demo" >
         </activity>
+
+        <service
+            android:name=".service.ScanBluetoothService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
 </manifest>

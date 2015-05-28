@@ -1,13 +1,10 @@
 package com.iot.locallization_ibeacon.activity;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -35,7 +32,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class Get_LanLng_Activity extends ActionBarActivity implements BluetoothAdapter.LeScanCallback{
+public class Get_LanLng_Activity extends ActionBarActivity {
     private GoogleMap map;
     private Hashtable<String,BluetoothSensor> markerList = new Hashtable<String,BluetoothSensor>();
     private Marker marker;
@@ -55,7 +52,6 @@ public class Get_LanLng_Activity extends ActionBarActivity implements BluetoothA
         setContentView(R.layout.activity_get__lan_lng);
         initButton();
         initMap();
-        initBlueTooth();
 
         task = new TimerTask() {
             @Override
@@ -65,10 +61,7 @@ public class Get_LanLng_Activity extends ActionBarActivity implements BluetoothA
                 Loghandler.sendMessage(message);
             }
         };
-
         timer.schedule(task, 500, 500);
-
-
     }
 
     public  void DrawLine(){
@@ -96,12 +89,6 @@ public class Get_LanLng_Activity extends ActionBarActivity implements BluetoothA
             BluetoothSensor max_sensor = Tools.getMaxRssiSensor(GlabalData.Templist);
             if (max_sensor==null)
                 return;
-
-      /*      TextView lat = (TextView) findViewById(R.id.TV_Lat);
-            TextView lng = (TextView) findViewById(R.id.TV_Lng);
-            lat.setText(curr_minor);
-            lng.setText(sensor.rssi+"");*/
-    //        Log.e("lescan","max_major:"+max_sensor.major+" max_minor:"+max_sensor.minor+" maxrssi:"+max_sensor.rssi +" rssi:"+ rssi);
             log.setText("max_major:" + max_sensor.major + " max_minor:" + max_sensor.minor + " maxrssi:" + max_sensor.rssi);
 
             super.handleMessage(msg);
@@ -148,21 +135,18 @@ public class Get_LanLng_Activity extends ActionBarActivity implements BluetoothA
             public void onClick(View v) {
 
                 BluetoothSensor max_sensor = Tools.getMaxRssiSensor( GlabalData.Templist);
-
                 BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
                 GlabalData.blutoothSensorList.remove(sensor.ID);
 
                 sensor.major = max_sensor.major;
                 sensor.minor = max_sensor.minor;
                 sensor.max_rssi = max_sensor.rssi;
-
                 sensor.ID = "major:" +  sensor.major + " minor:" +  sensor.minor;
                 sensor.markerOptions.title(sensor.ID);
                 sensor.markerOptions.snippet("x:" + Tools.formatFloat(sensor.position.latitude) + " y:" + Tools.formatFloat(sensor.position.longitude)+"\n"
                         +"max_rssi:" + sensor.max_rssi);
 
                 marker.remove();
-
                 marker =  map.addMarker(sensor.markerOptions);
                 marker.showInfoWindow();
 
@@ -178,24 +162,6 @@ public class Get_LanLng_Activity extends ActionBarActivity implements BluetoothA
 
             }
         });
-
-
-    }
-
-    private void  initBlueTooth() {
-
-
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null) {
-            Log.e("zdafdaf", "ddfdfdsafdsafsafdsaf");
-        }
-
-        if (!mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            int REQUEST_ENABLE_BT = 1;
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        };
-        mBluetoothAdapter.startLeScan(Get_LanLng_Activity.this);
 
 
     }
@@ -310,46 +276,6 @@ public class Get_LanLng_Activity extends ActionBarActivity implements BluetoothA
 
         CameraUpdate update = CameraUpdateFactory.newLatLngZoom(Tools.ancer, 22);
         map.moveCamera(update);
-    }
-
-    @Override
-    public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-
-        BluetoothSensor beacon =  Tools.dealScan(device, rssi, scanRecord);
-      /*  if (!beacon.major.equals("888") || !beacon.minor.equals("1"))
-            return;*/
-
-        BluetoothSensor max_sensor =null;
-        /*if (GlabalData.blutoothSensorList.containsKey("major:"+beacon.major+" minor:"+beacon.minor)){
-            BluetoothSensor sensor = GlabalData.blutoothSensorList.get("major:"+beacon.major+" minor:"+beacon.minor);
-            sensor.setRssi(rssi);
-        }*/
-
-        if (GlabalData.Templist.containsKey("major:"+beacon.major+" minor:"+beacon.minor)){
-            BluetoothSensor sensor = GlabalData.Templist.get("major:"+beacon.major+" minor:"+beacon.minor);
-            sensor.rssi=rssi;
-            //sensor.setRssi(rssi);
-
-        }else {
-            GlabalData.Templist.put("major:" + beacon.major + " minor:" + beacon.minor, beacon);
-        }
-
-        max_sensor = Tools.getMaxRssiSensor(GlabalData.Templist);
-
-        Log.e("lescan", "max_major:" + max_sensor.major + " max_minor:" + max_sensor.minor + " maxrssi:" + max_sensor.rssi + " rssi:" + rssi);
-
-
-    }
-    protected void onPause(){
-        super.onPause();
-        mBluetoothAdapter.stopLeScan(this);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        GlabalData.Templist.clear();
-        mBluetoothAdapter.startLeScan(this);
     }
 }
 

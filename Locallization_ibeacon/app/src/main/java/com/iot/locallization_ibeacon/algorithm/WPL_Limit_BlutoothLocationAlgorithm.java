@@ -30,9 +30,9 @@ public class WPL_Limit_BlutoothLocationAlgorithm extends BluetoothLocalizationAl
 			double x=0;
 			double y=0;
 			List<BluetoothSensor> sensorList = SortWifiSignal();
-			DemoActivity.logstring =sensorList.get(0).minor+" "+(sensorList.get(0).rssi-sensorList.get(0).max_rssi)+"\n";
-			DemoActivity.logstring +=sensorList.get(1).minor+" "+(sensorList.get(1).rssi-sensorList.get(1).max_rssi)+"\n";
-			DemoActivity.logstring +=sensorList.get(2).minor+" "+(sensorList.get(2).rssi-sensorList.get(2).max_rssi)+"\n";
+			DemoActivity.logstring =sensorList.get(0).minor+","+(sensorList.get(0).rssi-sensorList.get(0).max_rssi)+":";
+			DemoActivity.logstring +=sensorList.get(1).minor+","+(sensorList.get(1).rssi-sensorList.get(1).max_rssi)+":";
+			DemoActivity.logstring +=sensorList.get(2).minor+","+(sensorList.get(2).rssi-sensorList.get(2).max_rssi)+"";
 
 			handler.sendMessage(new Message());
 
