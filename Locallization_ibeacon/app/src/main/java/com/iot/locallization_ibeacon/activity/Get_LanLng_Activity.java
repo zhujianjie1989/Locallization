@@ -7,6 +7,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -40,6 +41,7 @@ public class Get_LanLng_Activity extends ActionBarActivity {
     private final Timer timer = new Timer();
     private TimerTask task;
     private boolean addLine_flag=false;
+    private boolean curr_or_max=true;
 
 
     @Override
@@ -58,6 +60,7 @@ public class Get_LanLng_Activity extends ActionBarActivity {
             }
         };
         timer.schedule(task, 500, 500);
+        GlabalData.handler = Loghandler;
     }
 
     public  void DrawLine(){
@@ -81,19 +84,33 @@ public class Get_LanLng_Activity extends ActionBarActivity {
     Handler Loghandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            TextView log = (TextView) findViewById( R.id.TV_Log);
-            if (marker!=null){
-                BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
-                BluetoothSensor max_sensor = Tools.getSensorByMajorandMinor(sensor.major,sensor.minor);
-                if (max_sensor==null)
-                    return;
-                log.setText("major:" + max_sensor.major + " minor:" + max_sensor.minor + " rssi:" + max_sensor.rssi);
-            }else{
-                BluetoothSensor max_sensor = Tools.getMaxRssiSensor(GlabalData.Templist);
-                if (max_sensor==null)
-                    return;
-                log.setText("max_major:" + max_sensor.major + " max_minor:" + max_sensor.minor + " maxrssi:" + max_sensor.rssi);
+            if (msg.arg1 == 1){
+
+                TextView log3 = (TextView) findViewById( R.id.TV_Log3);
+                log3.setText(GlabalData.log);
+
             }
+            TextView log1 = (TextView) findViewById( R.id.TV_Log1);
+            TextView log2 = (TextView) findViewById( R.id.TV_Log2);
+            if (marker !=null){
+                BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
+                if (sensor!=null)
+                {
+                    BluetoothSensor max_sensor = Tools.getSensorByMajorandMinor(sensor.major,sensor.minor);
+                    if (max_sensor==null)
+                        return;
+                    log1.setText("cur_major:" + max_sensor.major + " cur_minor:" + max_sensor.minor + " rssi:" + max_sensor.rssi);
+                }
+
+            }
+
+
+
+            BluetoothSensor max_sensor = Tools.getMaxRssiSensor(GlabalData.Templist);
+            if (max_sensor==null)
+                return;
+            log2.setText("max_major:" + max_sensor.major + " max_minor:" + max_sensor.minor + " rssi:" + max_sensor.rssi);
+
 
 
             super.handleMessage(msg);
@@ -102,10 +119,24 @@ public class Get_LanLng_Activity extends ActionBarActivity {
 
 
     private void initButton(){
+
+        RadioGroup radioGroup = (RadioGroup)findViewById(R.id.radioGroup);
         Button SetConf = (Button)findViewById(R.id.BT_SetConf);
         Button delete = (Button)findViewById(R.id.BT_DELETE);
         Button calibrate = (Button)findViewById(R.id.BT_Calibreate);
-        Button addline = (Button)findViewById(R.id.BT_addLine);
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                int radioButtonId = group.getCheckedRadioButtonId();
+
+               if(radioButtonId == R.id.RB_Curr){
+                   curr_or_max = false;
+               }else   if(radioButtonId == R.id.RB_Max){
+                   curr_or_max = true;
+               }
+            }
+        });
 
         SetConf.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,8 +170,8 @@ public class Get_LanLng_Activity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
 
-                TextView log = (TextView) findViewById( R.id.TV_Log);
-                if (marker!=null){
+                TextView log = (TextView) findViewById( R.id.TV_Log1);
+                if (marker!=null && curr_or_max==false){
                     BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
                     BluetoothSensor max_sensor = Tools.getSensorByMajorandMinor(sensor.major,sensor.minor);
                     if (max_sensor==null)
@@ -163,6 +194,28 @@ public class Get_LanLng_Activity extends ActionBarActivity {
 
                     GlabalData.blutoothSensorList.put(sensor.ID, sensor);
 
+                }else if (marker!=null && curr_or_max==true){
+                    BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
+                    BluetoothSensor max_sensor = Tools.getMaxRssiSensor(GlabalData.Templist);
+                    if (max_sensor==null)
+                        return;
+                    log.setText("major:" + max_sensor.major + " minor:" + max_sensor.minor + " rssi:" + max_sensor.rssi);
+                    //BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
+                    GlabalData.blutoothSensorList.remove(sensor.ID);
+
+                    sensor.major = max_sensor.major;
+                    sensor.minor = max_sensor.minor;
+                    sensor.max_rssi = max_sensor.rssi;
+                    sensor.ID = "major:" +  sensor.major + " minor:" +  sensor.minor;
+                    sensor.markerOptions.title(sensor.ID);
+                    sensor.markerOptions.snippet("x:" + Tools.formatFloat(sensor.position.latitude) + " y:" + Tools.formatFloat(sensor.position.longitude)+"\n"
+                            +"max_rssi:" + sensor.max_rssi);
+
+                    marker.remove();
+                    marker =  map.addMarker(sensor.markerOptions);
+                    marker.showInfoWindow();
+
+                    GlabalData.blutoothSensorList.put(sensor.ID, sensor);
                 }
 
               //  BluetoothSensor max_sensor = Tools.getMaxRssiSensor( GlabalData.Templist);
@@ -170,14 +223,14 @@ public class Get_LanLng_Activity extends ActionBarActivity {
             }
         });
 
-        addline.setOnClickListener(new View.OnClickListener() {
+     /*   addline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 addLine_flag = !addLine_flag;
                 GlabalData.Templist.clear();
 
             }
-        });
+        });*/
 
 
     }
@@ -219,10 +272,7 @@ public class Get_LanLng_Activity extends ActionBarActivity {
         map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng latLng) {
-                TextView lat = (TextView) findViewById(R.id.TV_Lat);
-                TextView lng = (TextView) findViewById(R.id.TV_Lng);
-                lat.setText(Tools.formatFloat(latLng.latitude));
-                lng.setText(Tools.formatFloat(latLng.longitude) + "");
+
 
                 BluetoothSensor sensor = new BluetoothSensor();
                 sensor.markerOptions =  new MarkerOptions().position(latLng).draggable(true).title(getID("111", markID+""))

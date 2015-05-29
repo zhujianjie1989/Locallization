@@ -1,6 +1,7 @@
 package com.iot.locallization_ibeacon.pojo;
 
 import android.os.Environment;
+import android.os.Handler;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -16,6 +17,7 @@ public class GlabalData {
 	
 	private static File sd = Environment.getExternalStorageDirectory();
 	public static String path = sd.getPath() + "/WiFiSensor";
-
+	public static Handler handler ;
+	public static String log;
 
 }

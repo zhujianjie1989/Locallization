@@ -14,43 +14,84 @@
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:columnCount="4">
+            android:columnCount="6">
 
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_column="0"
                 android:layout_row="0"
-                android:layout_column="0">
+                android:layout_columnSpan="6">
+                <RadioGroup android:id="@+id/radioGroup"  android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="curr"
+                        android:id="@+id/RB_Curr"
+                        android:layout_row="1"
+                        android:layout_column="0"
+                        android:checked="false" />
 
-                <TextView
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="max"
+                        android:id="@+id/RB_Max"
+                        android:layout_column="1"
+                        android:layout_row="1"
+                        android:checked="true" />
+
+                </RadioGroup>
+
+                <LinearLayout
+                    android:orientation="vertical"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="lat : "
-                    android:id="@+id/textView" />
+                    android:layout_height="match_parent"
+                    android:layout_row="0"
+                    android:layout_column="2"
+                    android:layout_columnSpan="4"
+                    android:gravity="center">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="Small Text"
-                    android:id="@+id/TV_Lat" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Medium Text"
+                        android:id="@+id/TV_Log1"
+                        android:layout_gravity="fill"
+                        android:layout_column="1"
+                        android:layout_row="0"
+                        android:layout_columnSpan="5"
+                        android:singleLine="false"
+                        android:autoText="false"
+                        android:gravity="fill_vertical" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="  Lng : "
-                    android:id="@+id/textView2" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Medium Text"
+                        android:id="@+id/TV_Log2"
+                        android:layout_gravity="fill"
+                        android:layout_column="1"
+                        android:layout_row="0"
+                        android:layout_columnSpan="5"
+                        android:singleLine="false"
+                        android:autoText="false"
+                        android:gravity="fill_vertical" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="Small Text"
-                    android:id="@+id/TV_Lng" />
-
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Medium Text"
+                        android:id="@+id/TV_Log3"
+                        android:layout_gravity="fill"
+                        android:layout_column="1"
+                        android:layout_row="0"
+                        android:layout_columnSpan="5"
+                        android:singleLine="false"
+                        android:autoText="false"
+                        android:gravity="fill_vertical" />
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -59,18 +100,9 @@
                 android:layout_height="wrap_content"
                 android:text="calibrate"
                 android:id="@+id/BT_Calibreate"
-                android:layout_row="0"
-                android:layout_column="1"
-                android:layout_columnSpan="3"
-                android:layout_rowSpan="2"
+                android:layout_row="1"
+                android:layout_column="0"
                 android:layout_gravity="fill" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="addLine"
-                android:id="@+id/BT_addLine"
-                android:layout_gravity="fill_horizontal" />
 
             <Button
                 android:layout_width="wrap_content"
@@ -78,8 +110,7 @@
                 android:text="Delete"
                 android:id="@+id/BT_DELETE"
                 android:layout_column="2"
-                android:layout_row="2"
-                android:layout_columnSpan="2"
+                android:layout_row="1"
                 android:layout_gravity="fill_horizontal" />
 
             <Button
@@ -87,19 +118,19 @@
                 android:layout_height="wrap_content"
                 android:text="SetConf"
                 android:id="@+id/BT_SetConf"
-                android:layout_column="0"
-                android:layout_row="2"
-                android:layout_columnSpan="2"
+                android:layout_column="1"
+                android:layout_row="1"
                 android:layout_gravity="fill_horizontal" />
 
-            <TextView
-                android:layout_width="wrap_content"
+            <EditText
+                android:layout_width="55dp"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Medium Text"
-                android:id="@+id/TV_Log"
-                android:layout_gravity="fill_horizontal"
-                android:layout_columnSpan="4" />
+                android:id="@+id/ET_Floor"
+                android:layout_row="1"
+                android:layout_column="4"
+                android:layout_columnSpan="2"
+                android:text="4" />
+
         </GridLayout>
 
         <fragment xmlns:android="http://schemas.android.com/apk/res/android"

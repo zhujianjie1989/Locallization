@@ -8,6 +8,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -64,11 +65,18 @@ public class ScanBluetoothService extends Service implements BluetoothAdapter.Le
         int txPower     = (scanRecord[startByte + 5]);
        // count++;
         BluetoothSensor beacon = new BluetoothSensor(ibeaconName, "",mac,major+"",minor+"",rssi,txPower);
-       // Log.e("lescon", beacon.major + "  " + beacon.minor + "  " + rssi + " count : "+count );
+        GlabalData.log= "major:"+beacon.major + " minor:" + beacon.minor + " rssi:" + rssi;
+
+        Message msg = new Message();
+        msg.arg1=1;
+        GlabalData.handler.sendMessage(msg);
+
+        Log.e("lescon", beacon.major + "  " + beacon.minor + "  " + rssi + " count : "+count );
         if (GlabalData.blutoothSensorList.containsKey("major:"+beacon.major+" minor:"+beacon.minor)){
             BluetoothSensor sensor = GlabalData.blutoothSensorList.get("major:"+beacon.major+" minor:"+beacon.minor);
             sensor.setRssi(rssi);
             sensor.updateTime = new Date().getTime();
+            Log.e("lescon", beacon.major + "  " + beacon.minor + "  " + rssi + " count : "+count );
         }
 
         if (GlabalData.Templist.containsKey("major:"+beacon.major+" minor:"+beacon.minor)){
