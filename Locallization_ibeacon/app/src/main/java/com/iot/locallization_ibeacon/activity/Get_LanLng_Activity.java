@@ -7,14 +7,15 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -42,6 +43,7 @@ public class Get_LanLng_Activity extends ActionBarActivity {
     private TimerTask task;
     private boolean addLine_flag=false;
     private boolean curr_or_max=true;
+    private GroundOverlay image=null;
 
 
     @Override
@@ -55,6 +57,7 @@ public class Get_LanLng_Activity extends ActionBarActivity {
             @Override
             public void run() {
                 Message message = new Message();
+
                 message.what = 1;
                 Loghandler.sendMessage(message);
             }
@@ -90,6 +93,8 @@ public class Get_LanLng_Activity extends ActionBarActivity {
                 log3.setText(GlabalData.log);
 
             }
+
+          //  changeImage();
             TextView log1 = (TextView) findViewById( R.id.TV_Log1);
             TextView log2 = (TextView) findViewById( R.id.TV_Log2);
             if (marker !=null){
@@ -117,26 +122,68 @@ public class Get_LanLng_Activity extends ActionBarActivity {
         }
     };
 
+private void changeImage(){
 
+
+
+    BitmapDescriptor img =null;
+    switch(GlabalData.floor)
+    {
+        case 1:
+            img=BitmapDescriptorFactory.fromResource(R.drawable.k11);
+            break;
+        case 2:
+            img=BitmapDescriptorFactory.fromResource(R.drawable.k22);
+            break;
+        case 3:
+            img=BitmapDescriptorFactory.fromResource(R.drawable.k33);
+            break;
+        case 4:
+            img=BitmapDescriptorFactory.fromResource(R.drawable.k44);
+            break;
+        default:
+            return;
+
+    }
+    if (image != null){
+        image.remove();
+        image = map.addGroundOverlay(new GroundOverlayOptions()
+                .image(img).anchor(0, 0).bearing(-45f)
+                .position(Tools.ancer, Tools.hw[0], Tools.hw[1]));
+    }
+
+
+
+}
     private void initButton(){
 
-        RadioGroup radioGroup = (RadioGroup)findViewById(R.id.radioGroup);
+
         Button SetConf = (Button)findViewById(R.id.BT_SetConf);
         Button delete = (Button)findViewById(R.id.BT_DELETE);
         Button calibrate = (Button)findViewById(R.id.BT_Calibreate);
+        Button pluse = (Button)findViewById(R.id.BT_Pluse);
+        Button sub = (Button)findViewById(R.id.BT_Sub);
 
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        pluse.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                int radioButtonId = group.getCheckedRadioButtonId();
-
-               if(radioButtonId == R.id.RB_Curr){
-                   curr_or_max = false;
-               }else   if(radioButtonId == R.id.RB_Max){
-                   curr_or_max = true;
-               }
+            public void onClick(View v) {
+                GlabalData.floor++;
+                TextView floor = (TextView)findViewById(R.id.TV_Floor);
+                floor.setText(GlabalData.floor+"");
+                changeImage();
             }
         });
+
+        sub.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GlabalData.floor--;
+                TextView floor = (TextView)findViewById(R.id.TV_Floor);
+                floor.setText(GlabalData.floor+"");
+                changeImage();
+            }
+        });
+
 
         SetConf.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,8 +232,9 @@ public class Get_LanLng_Activity extends ActionBarActivity {
                     sensor.max_rssi = max_sensor.rssi;
                     sensor.ID = "major:" +  sensor.major + " minor:" +  sensor.minor;
                     sensor.markerOptions.title(sensor.ID);
-                    sensor.markerOptions.snippet("x:" + Tools.formatFloat(sensor.position.latitude) + " y:" + Tools.formatFloat(sensor.position.longitude)+"\n"
-                            +"max_rssi:" + sensor.max_rssi);
+                    sensor.markerOptions.snippet("x:" + Tools.formatFloat(sensor.position.latitude) + " y:" + Tools.formatFloat(sensor.position.longitude) + "\n"
+                            + "max_rssi:" + sensor.max_rssi);
+                    sensor.floor=GlabalData.floor;
 
                     marker.remove();
                     marker =  map.addMarker(sensor.markerOptions);
@@ -239,8 +287,8 @@ public class Get_LanLng_Activity extends ActionBarActivity {
         map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                marker= null;
-                Log.e("initMap","onMapClick");
+                marker = null;
+                Log.e("initMap", "onMapClick");
             }
         });
 
@@ -275,18 +323,18 @@ public class Get_LanLng_Activity extends ActionBarActivity {
 
 
                 BluetoothSensor sensor = new BluetoothSensor();
-                sensor.markerOptions =  new MarkerOptions().position(latLng).draggable(true).title(getID("111", markID+""))
+                sensor.markerOptions = new MarkerOptions().position(latLng).draggable(true).title(getID("111", markID + ""))
                         .snippet("x:" + Tools.formatFloat(latLng.latitude) + " y:" + Tools.formatFloat(latLng.longitude) + "\n"
                                 + "max_rssi:" + sensor.max_rssi);
                 sensor.ID = sensor.markerOptions.getTitle();
-                sensor.position= latLng;
+                sensor.position = latLng;
                 sensor.major = "111";
-                sensor.minor= markID+"";
+                sensor.minor = markID + "";
+                sensor.floor = GlabalData.floor;
                 markID++;
 
                 map.addMarker(sensor.markerOptions);
                 markerList.put(sensor.ID, sensor);
-
 
 
             }
@@ -330,11 +378,9 @@ public class Get_LanLng_Activity extends ActionBarActivity {
         });
 
 
-        GroundOverlayOptions newarkMap  = new GroundOverlayOptions()
-                .image(BitmapDescriptorFactory.fromResource(R.drawable.k44)).anchor(0,0).bearing(-45f)
-                .position(Tools.ancer, Tools.hw[0], Tools.hw[1]);
-
-        map.addGroundOverlay(newarkMap);
+        image  =  map.addGroundOverlay( new GroundOverlayOptions()
+                        .image(BitmapDescriptorFactory.fromResource(R.drawable.k44)).anchor(0,0).bearing(-45f)
+                        .position(Tools.ancer, Tools.hw[0], Tools.hw[1]));
 
         File file = new File(Tools.path);
         if(file.exists()){
@@ -344,7 +390,12 @@ public class Get_LanLng_Activity extends ActionBarActivity {
             Iterator<String> ita= markerList.keySet().iterator();
             while(ita.hasNext())
             {
-                map.addMarker( markerList.get(ita.next()).markerOptions);
+                BluetoothSensor sensor = markerList.get(ita.next());
+                if (sensor.floor == GlabalData.floor)
+                {
+                    map.addMarker(sensor.markerOptions);
+                }
+
             }
         }
 

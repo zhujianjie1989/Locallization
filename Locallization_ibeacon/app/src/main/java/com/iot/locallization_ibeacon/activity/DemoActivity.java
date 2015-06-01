@@ -19,6 +19,7 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
@@ -49,6 +50,8 @@ public class DemoActivity extends Activity {
     private boolean scan_flag= false;
     private GroundOverlay newarkMap;
 
+    private GroundOverlay image=null;
+
     private WPL_Limit_BlutoothLocationAlgorithm location =new WPL_Limit_BlutoothLocationAlgorithm();
     LatLng NEWARK = new LatLng(1.342518999,103.679474999);
 
@@ -62,9 +65,39 @@ public class DemoActivity extends Activity {
          updateHandler.postDelayed(update, 1000);
     }
 
+    private void changeImage(){
+
+
+        BitmapDescriptor img =null;
+        switch(GlabalData.floor)
+        {
+            case 1:
+                img=BitmapDescriptorFactory.fromResource(R.drawable.k11);
+                break;
+            case 2:
+                img=BitmapDescriptorFactory.fromResource(R.drawable.k22);
+                break;
+            case 3:
+                img=BitmapDescriptorFactory.fromResource(R.drawable.k33);
+                break;
+            case 4:
+                img=BitmapDescriptorFactory.fromResource(R.drawable.k44);
+                break;
+            default:
+                return;
+
+        }
+        image.remove();
+        image = map.addGroundOverlay(new GroundOverlayOptions()
+                .image(img).anchor(0, 0).bearing(-45f)
+                .position(Tools.ancer, Tools.hw[0], Tools.hw[1]));
+
+
+    }
 
     private void updateMap()
     {
+        changeImage();
         location.setHandler(updatelog);
         location.DoLocalization();
 
@@ -90,7 +123,7 @@ public class DemoActivity extends Activity {
         map.getUiSettings().setIndoorLevelPickerEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
 
-        newarkMap  = map.addGroundOverlay(new GroundOverlayOptions()
+        image  = map.addGroundOverlay(new GroundOverlayOptions()
                 .image(BitmapDescriptorFactory.fromResource(R.drawable.k44)).anchor(0,0).bearing(-45f)
                 .position(NEWARK,hw[0], hw[1]));
 
@@ -147,6 +180,11 @@ public class DemoActivity extends Activity {
     Handler updatelog = new Handler(){
         @Override
         public void handleMessage(Message msg) {
+
+            if (msg.arg1==2){
+                changeImage();
+            }
+
             super.handleMessage(msg);
             TextView tx = (TextView)findViewById(R.id.textView5);
             tx.setText(logstring);

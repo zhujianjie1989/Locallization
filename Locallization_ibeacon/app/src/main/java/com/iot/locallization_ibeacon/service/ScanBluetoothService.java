@@ -77,6 +77,13 @@ public class ScanBluetoothService extends Service implements BluetoothAdapter.Le
             sensor.setRssi(rssi);
             sensor.updateTime = new Date().getTime();
             Log.e("lescon", beacon.major + "  " + beacon.minor + "  " + rssi + " count : "+count );
+
+            if (GlabalData.floor != sensor.floor && (sensor.rssi - sensor.max_rssi) > -30 ){
+                GlabalData.floor = sensor.floor;
+                msg = new Message();
+                msg.arg1 = 2;
+                GlabalData.handler.sendMessage(msg);
+            }
         }
 
         if (GlabalData.Templist.containsKey("major:"+beacon.major+" minor:"+beacon.minor)){

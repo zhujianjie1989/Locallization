@@ -19,5 +19,6 @@ public class GlabalData {
 	public static String path = sd.getPath() + "/WiFiSensor";
 	public static Handler handler ;
 	public static String log;
+	public static  int floor=4;
 
 }

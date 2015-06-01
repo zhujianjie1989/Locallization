@@ -14,103 +14,70 @@
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:columnCount="6">
+            android:columnCount="8">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
-                android:layout_row="0"
-                android:layout_columnSpan="6">
-                <RadioGroup android:id="@+id/radioGroup"  android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                    <RadioButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="curr"
-                        android:id="@+id/RB_Curr"
-                        android:layout_row="1"
-                        android:layout_column="0"
-                        android:checked="false" />
-
-                    <RadioButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="max"
-                        android:id="@+id/RB_Max"
-                        android:layout_column="1"
-                        android:layout_row="1"
-                        android:checked="true" />
-
-                </RadioGroup>
-
-                <LinearLayout
-                    android:orientation="vertical"
+                android:layout_row="1"
+                android:layout_columnSpan="4"
+                android:orientation="vertical">
+                <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Medium Text"
+                    android:id="@+id/TV_Log1"
+                    android:layout_gravity="fill"
+                    android:layout_column="1"
                     android:layout_row="0"
-                    android:layout_column="2"
-                    android:layout_columnSpan="4"
-                    android:gravity="center">
+                    android:layout_columnSpan="5"
+                    android:singleLine="false"
+                    android:autoText="false"
+                    android:gravity="fill_vertical" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Medium Text"
-                        android:id="@+id/TV_Log1"
-                        android:layout_gravity="fill"
-                        android:layout_column="1"
-                        android:layout_row="0"
-                        android:layout_columnSpan="5"
-                        android:singleLine="false"
-                        android:autoText="false"
-                        android:gravity="fill_vertical" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Medium Text"
+                    android:id="@+id/TV_Log2"
+                    android:layout_gravity="fill"
+                    android:layout_column="1"
+                    android:layout_row="0"
+                    android:layout_columnSpan="5"
+                    android:singleLine="false"
+                    android:autoText="false"
+                    android:gravity="fill_vertical" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Medium Text"
-                        android:id="@+id/TV_Log2"
-                        android:layout_gravity="fill"
-                        android:layout_column="1"
-                        android:layout_row="0"
-                        android:layout_columnSpan="5"
-                        android:singleLine="false"
-                        android:autoText="false"
-                        android:gravity="fill_vertical" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Medium Text"
-                        android:id="@+id/TV_Log3"
-                        android:layout_gravity="fill"
-                        android:layout_column="1"
-                        android:layout_row="0"
-                        android:layout_columnSpan="5"
-                        android:singleLine="false"
-                        android:autoText="false"
-                        android:gravity="fill_vertical" />
-                </LinearLayout>
-
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Medium Text"
+                    android:id="@+id/TV_Log3"
+                    android:layout_gravity="fill"
+                    android:layout_column="1"
+                    android:layout_row="0"
+                    android:layout_columnSpan="5"
+                    android:singleLine="false"
+                    android:autoText="false"
+                    android:gravity="fill_vertical" />
             </LinearLayout>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-"
+                android:id="@+id/BT_Sub"
+                android:layout_row="1"
+                android:layout_column="4" />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="calibrate"
                 android:id="@+id/BT_Calibreate"
-                android:layout_row="1"
+                android:layout_row="0"
                 android:layout_column="0"
-                android:layout_gravity="fill" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Delete"
-                android:id="@+id/BT_DELETE"
-                android:layout_column="2"
-                android:layout_row="1"
                 android:layout_gravity="fill_horizontal" />
 
             <Button
@@ -119,17 +86,34 @@
                 android:text="SetConf"
                 android:id="@+id/BT_SetConf"
                 android:layout_column="1"
-                android:layout_row="1"
+                android:layout_row="0"
                 android:layout_gravity="fill_horizontal" />
 
-            <EditText
-                android:layout_width="55dp"
+            <Button
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/ET_Floor"
-                android:layout_row="1"
-                android:layout_column="4"
-                android:layout_columnSpan="2"
-                android:text="4" />
+                android:text="Delete"
+                android:id="@+id/BT_DELETE"
+                android:layout_column="2"
+                android:layout_row="0"
+                android:layout_gravity="fill_horizontal" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="4"
+                android:id="@+id/TV_Floor"
+                android:layout_column="3"
+                android:layout_row="0" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+"
+                android:id="@+id/BT_Pluse"
+                android:layout_row="0"
+                android:layout_column="4" />
 
         </GridLayout>
 
