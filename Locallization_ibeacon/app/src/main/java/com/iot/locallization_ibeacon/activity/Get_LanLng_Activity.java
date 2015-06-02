@@ -44,6 +44,7 @@ public class Get_LanLng_Activity extends ActionBarActivity {
     private boolean addLine_flag=false;
     private boolean curr_or_max=true;
     private GroundOverlay image=null;
+    public int floor=4;
 
 
     @Override
@@ -52,6 +53,7 @@ public class Get_LanLng_Activity extends ActionBarActivity {
         setContentView(R.layout.activity_get__lan_lng);
         initButton();
         initMap();
+
 
         task = new TimerTask() {
             @Override
@@ -66,20 +68,6 @@ public class Get_LanLng_Activity extends ActionBarActivity {
         GlabalData.handler = Loghandler;
     }
 
-    public  void DrawLine(){
-        Iterator<String>ite = GlabalData.blutoothSensorList.keySet().iterator();
-        while(ite.hasNext())
-        {
-            BluetoothSensor sensor = GlabalData.blutoothSensorList.get(ite.next());
-            Iterator<Line> Lite = sensor.lines.iterator();
-            while(Lite.hasNext()){
-                Line line = Lite.next();
-                BluetoothSensor dist = GlabalData.blutoothSensorList.get(getID(line.major,line.minor));
-                map.addPolyline(new PolylineOptions().add(sensor.markerOptions.getPosition()).add(dist.markerOptions.getPosition()));
-            }
-        }
-    }
-
     public String getID(String ma ,String mi){
         return "major:" +  ma + " minor:" +  mi;
     }
@@ -88,13 +76,10 @@ public class Get_LanLng_Activity extends ActionBarActivity {
         @Override
         public void handleMessage(Message msg) {
             if (msg.arg1 == 1){
-
                 TextView log3 = (TextView) findViewById( R.id.TV_Log3);
                 log3.setText(GlabalData.log);
-
             }
 
-          //  changeImage();
             TextView log1 = (TextView) findViewById( R.id.TV_Log1);
             TextView log2 = (TextView) findViewById( R.id.TV_Log2);
             if (marker !=null){
@@ -127,7 +112,7 @@ private void changeImage(){
 
 
     BitmapDescriptor img =null;
-    switch(GlabalData.floor)
+    switch(floor)
     {
         case 1:
             img=BitmapDescriptorFactory.fromResource(R.drawable.k11);
@@ -145,11 +130,24 @@ private void changeImage(){
             return;
 
     }
+    map.clear();
     if (image != null){
-        image.remove();
+
         image = map.addGroundOverlay(new GroundOverlayOptions()
                 .image(img).anchor(0, 0).bearing(-45f)
                 .position(Tools.ancer, Tools.hw[0], Tools.hw[1]));
+    }
+
+    Iterator<String> key_ite = markerList.keySet().iterator();
+
+    while(key_ite.hasNext()){
+        BluetoothSensor sensor = markerList.get(key_ite.next());
+        if (sensor.floor ==floor){
+
+            map.addMarker(sensor.markerOptions);
+        }
+
+
     }
 
 
@@ -167,9 +165,9 @@ private void changeImage(){
         pluse.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GlabalData.floor++;
-                TextView floor = (TextView)findViewById(R.id.TV_Floor);
-                floor.setText(GlabalData.floor+"");
+                floor++;
+                TextView tvfloor = (TextView)findViewById(R.id.TV_Floor);
+                tvfloor.setText(floor+"");
                 changeImage();
             }
         });
@@ -177,9 +175,9 @@ private void changeImage(){
         sub.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GlabalData.floor--;
-                TextView floor = (TextView)findViewById(R.id.TV_Floor);
-                floor.setText(GlabalData.floor+"");
+                floor--;
+                TextView tvfloor = (TextView)findViewById(R.id.TV_Floor);
+                tvfloor.setText(floor+"");
                 changeImage();
             }
         });
@@ -234,7 +232,7 @@ private void changeImage(){
                     sensor.markerOptions.title(sensor.ID);
                     sensor.markerOptions.snippet("x:" + Tools.formatFloat(sensor.position.latitude) + " y:" + Tools.formatFloat(sensor.position.longitude) + "\n"
                             + "max_rssi:" + sensor.max_rssi);
-                    sensor.floor=GlabalData.floor;
+                    sensor.floor=floor;
 
                     marker.remove();
                     marker =  map.addMarker(sensor.markerOptions);
@@ -330,7 +328,7 @@ private void changeImage(){
                 sensor.position = latLng;
                 sensor.major = "111";
                 sensor.minor = markID + "";
-                sensor.floor = GlabalData.floor;
+                sensor.floor = floor;
                 markID++;
 
                 map.addMarker(sensor.markerOptions);
@@ -391,7 +389,7 @@ private void changeImage(){
             while(ita.hasNext())
             {
                 BluetoothSensor sensor = markerList.get(ita.next());
-                if (sensor.floor == GlabalData.floor)
+                if (sensor.floor == floor)
                 {
                     map.addMarker(sensor.markerOptions);
                 }

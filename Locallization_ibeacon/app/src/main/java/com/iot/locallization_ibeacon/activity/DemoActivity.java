@@ -3,8 +3,6 @@ package com.iot.locallization_ibeacon.activity;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.Context;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -107,14 +105,7 @@ public class DemoActivity extends Activity {
         currmark=map.addMarker(new MarkerOptions().position(GlabalData.currentPosition));
     }
 
-    private Runnable update = new Runnable(){
 
-        @Override
-        public void run() {
-            updateMap();
-            updateHandler.postDelayed(update, 1500);
-        }
-    };
 
     private void  initMap(){
 
@@ -165,6 +156,14 @@ public class DemoActivity extends Activity {
         });
 
     }
+    private Runnable update = new Runnable(){
+
+        @Override
+        public void run() {
+            updateMap();
+            updateHandler.postDelayed(update, 1500);
+        }
+    };
 
     Handler updateHandler = new Handler(){
         @Override
@@ -190,41 +189,5 @@ public class DemoActivity extends Activity {
             tx.setText(logstring);
         }
     };
-
-
-
-    private void  initGPS() {
-        locationManager = (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                /*position = new LatLng(location.getLatitude(),location.getLongitude());
-                CameraUpdate update = CameraUpdateFactory.newLatLngZoom(position, 18);
-                map.animateCamera(update);*/
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-        };
-
-        if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-        {
-            locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER,2000,0,locationListener);
-        }
-
-    }
-
 
 }

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
@@ -16,16 +17,34 @@ import com.iot.locallization_ibeacon.pojo.BluetoothSensor;
 import com.iot.locallization_ibeacon.pojo.GlabalData;
 
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ScanBluetoothService extends Service implements BluetoothAdapter.LeScanCallback{
     private BluetoothAdapter mBluetoothAdapter;
     private SparseArray<BluetoothDevice> mDevices;
     private LocationManager locationManager;
     private LocationListener locationListener;
+    private final Timer timer = new Timer();
+    private TimerTask task;
+    private Boolean on_off = false;
 
-    public ScanBluetoothService() {
-      //  initBlueTooth();
-    }
+    Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            on_off = !on_off;
+            if (on_off){
+                mBluetoothAdapter.startLeScan(ScanBluetoothService.this);
+                Log.e("mBluetoothAdapter","startLeScan");
+            }else{
+                mBluetoothAdapter.stopLeScan(ScanBluetoothService.this);
+                Log.e("mBluetoothAdapter", "stopLeScan");
+            }
+
+        }
+    };
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -48,11 +67,19 @@ public class ScanBluetoothService extends Service implements BluetoothAdapter.Le
             ex.printStackTrace();
         }
 
-        mBluetoothAdapter.startLeScan(this);
+        task = new TimerTask() {
+            @Override
+            public void run() {
+                Message message = new Message();
 
+                message.what = 1;
+                handler.sendMessage(message);
+            }
+        };
+        timer.schedule(task, 1000,1000);
 
     }
-    private int count =0;
+
     @Override
     public void onLeScan( BluetoothDevice device, int rssi,  byte[] scanRecord){
 
@@ -67,22 +94,28 @@ public class ScanBluetoothService extends Service implements BluetoothAdapter.Le
         BluetoothSensor beacon = new BluetoothSensor(ibeaconName, "",mac,major+"",minor+"",rssi,txPower);
         GlabalData.log= "major:"+beacon.major + " minor:" + beacon.minor + " rssi:" + rssi;
 
-        Message msg = new Message();
-        msg.arg1=1;
-        GlabalData.handler.sendMessage(msg);
+        if (GlabalData.handler!=null){
+            Message msg = new Message();
+            msg.arg1=1;
+            GlabalData.handler.sendMessage(msg);
+        }
 
-        Log.e("lescon", beacon.major + "  " + beacon.minor + "  " + rssi + " count : "+count );
+
+        Log.e("lescon", beacon.major + "  " + beacon.minor + "  " + rssi + " floor : " + GlabalData.floor);
         if (GlabalData.blutoothSensorList.containsKey("major:"+beacon.major+" minor:"+beacon.minor)){
             BluetoothSensor sensor = GlabalData.blutoothSensorList.get("major:"+beacon.major+" minor:"+beacon.minor);
             sensor.setRssi(rssi);
             sensor.updateTime = new Date().getTime();
-            Log.e("lescon", beacon.major + "  " + beacon.minor + "  " + rssi + " count : "+count );
+        //    Log.e("lescon", beacon.major + "  " + beacon.minor + "  " + rssi + " floor : "+GlabalData.floor );
 
             if (GlabalData.floor != sensor.floor && (sensor.rssi - sensor.max_rssi) > -30 ){
                 GlabalData.floor = sensor.floor;
-                msg = new Message();
-                msg.arg1 = 2;
-                GlabalData.handler.sendMessage(msg);
+                if (GlabalData.handler!=null){
+                    Message msg = new Message();
+                    msg.arg1=2;
+                    GlabalData.handler.sendMessage(msg);
+                }
+                Log.e("lescon", "floor = " +GlabalData.floor);
             }
         }
 

@@ -34,6 +34,11 @@ public class MainActivity extends Activity {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 sc= new ScanServiceConnection();
                 Intent service = new Intent(MainActivity.this,ScanBluetoothService.class);
                 bindService(service,sc,BIND_AUTO_CREATE);
