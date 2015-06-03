@@ -7,6 +7,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -20,11 +22,9 @@ import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.iot.locallization_ibeacon.R;
-import com.iot.locallization_ibeacon.pojo.BluetoothSensor;
-import com.iot.locallization_ibeacon.pojo.GlabalData;
-import com.iot.locallization_ibeacon.pojo.Line;
+import com.iot.locallization_ibeacon.pojo.Beacon;
+import com.iot.locallization_ibeacon.pojo.GlobalData;
 import com.iot.locallization_ibeacon.tools.Tools;
 
 import java.io.File;
@@ -34,9 +34,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class Get_LanLng_Activity extends ActionBarActivity {
+public class InitBeaconPositionActivity extends ActionBarActivity {
     private GoogleMap map;
-    private Hashtable<String,BluetoothSensor> markerList = new Hashtable<String,BluetoothSensor>();
+    private Hashtable<String,Beacon> markerList = new Hashtable<String,Beacon>();
     private Marker marker;
     private int markID=0;
     private final Timer timer = new Timer();
@@ -50,7 +50,7 @@ public class Get_LanLng_Activity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_get__lan_lng);
+        setContentView(R.layout.activity_initbeaconposition);
         initButton();
         initMap();
 
@@ -65,7 +65,7 @@ public class Get_LanLng_Activity extends ActionBarActivity {
             }
         };
         timer.schedule(task, 500, 500);
-        GlabalData.handler = Loghandler;
+        GlobalData.loghandler = Loghandler;
     }
 
     public String getID(String ma ,String mi){
@@ -77,16 +77,16 @@ public class Get_LanLng_Activity extends ActionBarActivity {
         public void handleMessage(Message msg) {
             if (msg.arg1 == 1){
                 TextView log3 = (TextView) findViewById( R.id.TV_Log3);
-                log3.setText(GlabalData.log);
+                log3.setText(GlobalData.log);
             }
 
             TextView log1 = (TextView) findViewById( R.id.TV_Log1);
             TextView log2 = (TextView) findViewById( R.id.TV_Log2);
             if (marker !=null){
-                BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
+                Beacon sensor =  GlobalData.beaconlist.get(marker.getTitle());
                 if (sensor!=null)
                 {
-                    BluetoothSensor max_sensor = Tools.getSensorByMajorandMinor(sensor.major,sensor.minor);
+                    Beacon max_sensor = Tools.getSensorByMajorandMinor(sensor.major,sensor.minor);
                     if (max_sensor==null)
                         return;
                     log1.setText("cur_major:" + max_sensor.major + " cur_minor:" + max_sensor.minor + " rssi:" + max_sensor.rssi);
@@ -96,7 +96,7 @@ public class Get_LanLng_Activity extends ActionBarActivity {
 
 
 
-            BluetoothSensor max_sensor = Tools.getMaxRssiSensor(GlabalData.Templist);
+            Beacon max_sensor = Tools.getMaxRssiSensor(GlobalData.templist);
             if (max_sensor==null)
                 return;
             log2.setText("max_major:" + max_sensor.major + " max_minor:" + max_sensor.minor + " rssi:" + max_sensor.rssi);
@@ -135,13 +135,13 @@ private void changeImage(){
 
         image = map.addGroundOverlay(new GroundOverlayOptions()
                 .image(img).anchor(0, 0).bearing(-45f)
-                .position(Tools.ancer, Tools.hw[0], Tools.hw[1]));
+                .position(GlobalData.ancer, GlobalData.hw[0], GlobalData.hw[1]));
     }
 
     Iterator<String> key_ite = markerList.keySet().iterator();
 
     while(key_ite.hasNext()){
-        BluetoothSensor sensor = markerList.get(key_ite.next());
+        Beacon sensor = markerList.get(key_ite.next());
         if (sensor.floor ==floor){
 
             map.addMarker(sensor.markerOptions);
@@ -155,8 +155,6 @@ private void changeImage(){
 }
     private void initButton(){
 
-
-        Button SetConf = (Button)findViewById(R.id.BT_SetConf);
         Button delete = (Button)findViewById(R.id.BT_DELETE);
         Button calibrate = (Button)findViewById(R.id.BT_Calibreate);
         Button pluse = (Button)findViewById(R.id.BT_Pluse);
@@ -177,27 +175,8 @@ private void changeImage(){
             public void onClick(View v) {
                 floor--;
                 TextView tvfloor = (TextView)findViewById(R.id.TV_Floor);
-                tvfloor.setText(floor+"");
+                tvfloor.setText(floor + "");
                 changeImage();
-            }
-        });
-
-
-        SetConf.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                GlabalData.blutoothSensorList = markerList;
-                File file = new File(Tools.path);
-                if (file.exists()) {
-                    file.delete();
-                }
-                Iterator<String> ite = markerList.keySet().iterator();
-                while (ite.hasNext()) {
-                    Tools.AppendToConfigFile(markerList.get(ite.next()));
-                }
-
-                Tools.ReadConfigFile();
-
             }
         });
 
@@ -206,6 +185,7 @@ private void changeImage(){
             public void onClick(View v) {
                 markerList.remove(marker.getTitle());
                 marker.remove();
+                saveConfig();
 
             }
         });
@@ -215,70 +195,87 @@ private void changeImage(){
             @Override
             public void onClick(View v) {
 
-                TextView log = (TextView) findViewById( R.id.TV_Log1);
-                if (marker!=null && curr_or_max==false){
-                    BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
-                    BluetoothSensor max_sensor = Tools.getSensorByMajorandMinor(sensor.major,sensor.minor);
-                    if (max_sensor==null)
+                TextView log = (TextView) findViewById(R.id.TV_Log1);
+                if (marker != null && curr_or_max == false) {
+                    Beacon sensor = GlobalData.beaconlist.get(marker.getTitle());
+                    Beacon curr_sensor = Tools.getSensorByMajorandMinor(sensor.major, sensor.minor);
+                    if (curr_sensor == null)
                         return;
-                    log.setText("major:" + max_sensor.major + " minor:" + max_sensor.minor + " rssi:" + max_sensor.rssi);
-                    //BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
-                    GlabalData.blutoothSensorList.remove(sensor.ID);
-
-                    sensor.major = max_sensor.major;
-                    sensor.minor = max_sensor.minor;
-                    sensor.max_rssi = max_sensor.rssi;
-                    sensor.ID = "major:" +  sensor.major + " minor:" +  sensor.minor;
+                    log.setText("major:" + curr_sensor.major + " minor:" + curr_sensor.minor + " rssi:" + curr_sensor.rssi);
+                    GlobalData.beaconlist.remove(sensor.ID);
+                    sensor.major = curr_sensor.major;
+                    sensor.minor = curr_sensor.minor;
+                    sensor.max_rssi = curr_sensor.rssi;
+                    sensor.ID = "major:" + sensor.major + " minor:" + sensor.minor;
                     sensor.markerOptions.title(sensor.ID);
                     sensor.markerOptions.snippet("x:" + Tools.formatFloat(sensor.position.latitude) + " y:" + Tools.formatFloat(sensor.position.longitude) + "\n"
                             + "max_rssi:" + sensor.max_rssi);
-                    sensor.floor=floor;
-
+                    sensor.floor = floor;
                     marker.remove();
-                    marker =  map.addMarker(sensor.markerOptions);
+                    marker = map.addMarker(sensor.markerOptions);
                     marker.showInfoWindow();
 
-                    GlabalData.blutoothSensorList.put(sensor.ID, sensor);
+                    GlobalData.beaconlist.put(sensor.ID, sensor);
 
-                }else if (marker!=null && curr_or_max==true){
-                    BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
-                    BluetoothSensor max_sensor = Tools.getMaxRssiSensor(GlabalData.Templist);
-                    if (max_sensor==null)
+                } else if (marker != null && curr_or_max == true) {
+                    Beacon sensor = GlobalData.beaconlist.get(marker.getTitle());
+                    Beacon max_sensor = Tools.getMaxRssiSensor(GlobalData.templist);
+                    if (max_sensor == null) {
                         return;
-                    log.setText("major:" + max_sensor.major + " minor:" + max_sensor.minor + " rssi:" + max_sensor.rssi);
-                    //BluetoothSensor sensor =  GlabalData.blutoothSensorList.get(marker.getTitle());
-                    GlabalData.blutoothSensorList.remove(sensor.ID);
+                    }
 
+                    log.setText("major:" + max_sensor.major + " minor:" + max_sensor.minor + " rssi:" + max_sensor.rssi);
+                    GlobalData.beaconlist.remove(sensor.ID);
                     sensor.major = max_sensor.major;
                     sensor.minor = max_sensor.minor;
                     sensor.max_rssi = max_sensor.rssi;
-                    sensor.ID = "major:" +  sensor.major + " minor:" +  sensor.minor;
+                    sensor.ID = "major:" + sensor.major + " minor:" + sensor.minor;
                     sensor.markerOptions.title(sensor.ID);
-                    sensor.markerOptions.snippet("x:" + Tools.formatFloat(sensor.position.latitude) + " y:" + Tools.formatFloat(sensor.position.longitude)+"\n"
-                            +"max_rssi:" + sensor.max_rssi);
+                    sensor.markerOptions.snippet("x:" + Tools.formatFloat(sensor.position.latitude) + " y:" + Tools.formatFloat(sensor.position.longitude) + "\n"
+                            + "max_rssi:" + sensor.max_rssi);
 
                     marker.remove();
-                    marker =  map.addMarker(sensor.markerOptions);
+                    marker = map.addMarker(sensor.markerOptions);
                     marker.showInfoWindow();
 
-                    GlabalData.blutoothSensorList.put(sensor.ID, sensor);
+                    GlobalData.beaconlist.put(sensor.ID, sensor);
                 }
-
-              //  BluetoothSensor max_sensor = Tools.getMaxRssiSensor( GlabalData.Templist);
+                saveConfig();
 
             }
         });
 
-     /*   addline.setOnClickListener(new View.OnClickListener() {
+
+        RadioButton curr = (RadioButton)findViewById(R.id.RB_Curr);
+        RadioButton max = (RadioButton)findViewById(R.id.RB_Max);
+        curr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-                addLine_flag = !addLine_flag;
-                GlabalData.Templist.clear();
-
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                curr_or_max = false;
             }
-        });*/
+        });
+        max.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                curr_or_max = true;
+            }
+        });
 
+    }
 
+    public void saveConfig()
+    {
+        GlobalData.beaconlist =markerList;
+        File file = new File(Tools.path);
+        if (file.exists()) {
+            file.delete();
+        }
+        Iterator<String> ite = markerList.keySet().iterator();
+        while (ite.hasNext()) {
+            Tools.AppendToConfigFile(markerList.get(ite.next()));
+        }
+
+        Tools.ReadConfigFile();
     }
     private void initMap(){
         map=((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
@@ -292,22 +289,9 @@ private void changeImage(){
 
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
-            public boolean onMarkerClick(Marker marker) {
-
-                if (addLine_flag && Get_LanLng_Activity.this.marker != null) {
-                    PolylineOptions rectOptions = new PolylineOptions().add(Get_LanLng_Activity.this.marker.getPosition()).add(marker.getPosition());
-                    map.addPolyline(rectOptions);
-                    BluetoothSensor sensor1 = markerList.get(Get_LanLng_Activity.this.marker.getTitle());
-                    BluetoothSensor sensor2 = markerList.get(marker.getTitle());
-                    if (!sensor1.containLine(sensor2.major, sensor2.minor)) {
-                        sensor1.lines.add(new Line(sensor2.major, sensor2.minor, 0));
-                        sensor2.lines.add(new Line(sensor1.major, sensor1.minor, 0));
-                    }
-
-                }
-
-
-                Get_LanLng_Activity.this.marker = marker;
+            public boolean onMarkerClick(Marker marker)
+            {
+                InitBeaconPositionActivity.this.marker = marker;
                 marker.setSnippet("x:" + Tools.formatFloat(marker.getPosition().latitude) + " y:" + Tools.formatFloat(marker.getPosition().longitude)
                         + "\n max_rssi:" + markerList.get(marker.getTitle()).max_rssi);
                 markerList.get(marker.getTitle()).markerOptions.position(marker.getPosition());
@@ -319,11 +303,13 @@ private void changeImage(){
             @Override
             public void onMapLongClick(LatLng latLng) {
 
-
-                BluetoothSensor sensor = new BluetoothSensor();
-                sensor.markerOptions = new MarkerOptions().position(latLng).draggable(true).title(getID("111", markID + ""))
-                        .snippet("x:" + Tools.formatFloat(latLng.latitude) + " y:" + Tools.formatFloat(latLng.longitude) + "\n"
+                Beacon sensor = new Beacon();
+                sensor.markerOptions = new MarkerOptions().position(latLng)
+                        .draggable(true).title(getID("111", markID + ""))
+                        .snippet("x:" + Tools.formatFloat(latLng.latitude)
+                                + " y:" + Tools.formatFloat(latLng.longitude) + "\n"
                                 + "max_rssi:" + sensor.max_rssi);
+
                 sensor.ID = sensor.markerOptions.getTitle();
                 sensor.position = latLng;
                 sensor.major = "111";
@@ -378,17 +364,18 @@ private void changeImage(){
 
         image  =  map.addGroundOverlay( new GroundOverlayOptions()
                         .image(BitmapDescriptorFactory.fromResource(R.drawable.k44)).anchor(0,0).bearing(-45f)
-                        .position(Tools.ancer, Tools.hw[0], Tools.hw[1]));
+                        .position(GlobalData.ancer, GlobalData.hw[0], GlobalData.hw[1]));
 
         File file = new File(Tools.path);
-        if(file.exists()){
+        if(file.exists())
+        {
             Tools.ReadConfigFile();
-            markerList=  GlabalData.blutoothSensorList;
+            markerList=  GlobalData.beaconlist;
 
             Iterator<String> ita= markerList.keySet().iterator();
             while(ita.hasNext())
             {
-                BluetoothSensor sensor = markerList.get(ita.next());
+                Beacon sensor = markerList.get(ita.next());
                 if (sensor.floor == floor)
                 {
                     map.addMarker(sensor.markerOptions);
@@ -397,7 +384,7 @@ private void changeImage(){
             }
         }
 
-        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(Tools.ancer, 22);
+        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(GlobalData.ancer, 22);
         map.moveCamera(update);
     }
 }

@@ -1,17 +1,12 @@
 package com.iot.locallization_ibeacon.tools;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.Context;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.iot.locallization_ibeacon.pojo.BluetoothSensor;
-import com.iot.locallization_ibeacon.pojo.GlabalData;
-import com.iot.locallization_ibeacon.pojo.Line;
+import com.iot.locallization_ibeacon.pojo.Beacon;
+import com.iot.locallization_ibeacon.pojo.GlobalData;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -21,31 +16,24 @@ import java.text.DecimalFormat;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-/**
- * Created by zhujianjie on 19/5/2015.
- */
 public class Tools extends  Activity {
-    public static  String path="/sdcard/sensorInfo.txt";
-    private static BluetoothAdapter mBluetoothAdapter;
+
     private static double coefficient1= 0.42093;
     private static double coefficient2= 6.9476;
     private static double coefficient3 =0.54992;
     private static String TAG = "Tools";
-    public static float[] hw={188,23f};
-    public static LatLng ancer = new LatLng(
-            1.342518999,103.679474999
-    );
-    public static void AppendToConfigFile(BluetoothSensor sensor) {
+    public static  String path="/sdcard/sensorInfo.txt";
+
+    public static final char[] hexArray = "0123456789ABCDEF".toCharArray();
+
+    public static void AppendToConfigFile(Beacon sensor)
+    {
         try {
 
             FileWriter writer = new FileWriter("/sdcard/sensorInfo.txt",true);
-            String msg = sensor.ID+","+sensor.major+","+sensor.minor+","+sensor.position.latitude+","+ sensor.position.longitude+","+sensor.floor+","+sensor.max_rssi+",";
-            Iterator<Line> ita = sensor.lines.iterator();
-            while(ita.hasNext())
-            {
-                Line line = ita.next();
-                msg= msg + line.major+"M"+line.minor+"N";
-            }
+            String msg = sensor.ID+","+sensor.major+","+sensor.minor+","
+                    +sensor.position.latitude+","+ sensor.position.longitude
+                    +","+sensor.floor+","+sensor.max_rssi+",";
             writer.write(msg+"\n");
             writer.close();
         } catch (IOException e) {
@@ -53,17 +41,14 @@ public class Tools extends  Activity {
         }
     }
 
-    public static void WriteToConfigFile(BluetoothSensor sensor) {
+    public static void WriteToConfigFile(Beacon sensor)
+    {
         try {
 
             FileWriter writer = new FileWriter("/sdcard/sensorInfo.txt");
-            String msg = sensor.ID+","+sensor.major+","+sensor.minor+","+sensor.position.latitude+","+ sensor.position.longitude+","+sensor.floor+","+sensor.max_rssi+",";
-            Iterator<Line> ita = sensor.lines.iterator();
-            while(ita.hasNext())
-            {
-                Line line = ita.next();
-                msg= msg + line.major+"M"+line.minor+"N";
-            }
+            String msg = sensor.ID+","+sensor.major+","+sensor.minor+","
+                    +sensor.position.latitude+","+ sensor.position.longitude+","
+                    +sensor.floor+","+sensor.max_rssi+",";
             writer.write(msg+"\n");
             writer.close();
         } catch (IOException e) {
@@ -73,13 +58,15 @@ public class Tools extends  Activity {
 
 
 
-    public static void ReadConfigFile()  {
-        try{
+    public static void ReadConfigFile()
+    {
+        try
+        {
             BufferedReader br = new BufferedReader(new FileReader("/sdcard/sensorInfo.txt"));
             String data = br.readLine();
-            GlabalData.blutoothSensorList.clear();
+            GlobalData.beaconlist.clear();
             while( data!=null) {
-                BluetoothSensor sensor = new BluetoothSensor();
+                Beacon sensor = new Beacon();
                 String[] info = data.split(",");
                // sensor.mac = info[0];
                 sensor.ID = info[0];
@@ -89,7 +76,7 @@ public class Tools extends  Activity {
                 sensor.floor =Integer.parseInt(info[5]);
                 sensor.max_rssi = Integer.parseInt(info[6]);
 
-                if(info.length > 7){
+               /* if(info.length > 7){
                     String[] lines = info[7].split("N");
                     Log.e("debug",info[7]+"    "+lines.length);
                     for (int i = 0; i < lines.length; i++){
@@ -99,17 +86,19 @@ public class Tools extends  Activity {
                         sensor.lines.add(new Line(major,minor,0));
 
                     }
-                }
+                }*/
 
                 sensor.markerOptions.title(sensor.ID).draggable(true);
                 sensor.markerOptions.position(sensor.position);
                 sensor.markerOptions.snippet("x:" + sensor.position.latitude + "y:" + sensor.position.latitude + "\n max_rssi:" + sensor.max_rssi);
-                GlabalData.blutoothSensorList.put(sensor.ID, sensor);
+                GlobalData.beaconlist.put(sensor.ID, sensor);
                 Log.e("ReadConfigFile", sensor.toString());
                 data = br.readLine();
             }
             br.close();
-        }catch (IOException e) {
+        }
+        catch (IOException e)
+        {
                 e.printStackTrace();
         }
 
@@ -130,75 +119,75 @@ public class Tools extends  Activity {
         Log.e("dddd", url + param);
         return  httpOperationUtils .doGet(url+param);
     }
-    private  LocationManager locationManager;
-    private  LocationListener locationListener;
 
-    private  void  initBlueTooth() {
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-    }
-    public double calculateDistance(int txPower, double rssi) {
-        if (rssi == 0) {
-            return -1.0; // if we cannot determine accuracy, return -1.
-        }
-
-     //   Log.d(TAG, "calculating distance based on mRssi of %s and txPower of %s", rssi, txPower);
-
-
+    public double calculateDistance(int txPower, double rssi)
+    {
         double ratio = rssi*1.0/txPower;
         double distance;
-        if (ratio < 1.0) {
+
+        if (rssi == 0)
+        {
+            return -1.0;
+        }
+
+        if (ratio < 1.0)
+        {
             distance =  Math.pow(ratio,10);
         }
-        else {
+        else
+        {
             distance =  (coefficient1)*Math.pow(ratio,coefficient2) + coefficient3;
         }
-        //Log.d(TAG, "avg mRssi: %s distance: %s", rssi, distance);
         return distance;
     }
 
-    public static  BluetoothSensor dealScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
+    public static Beacon dealScan(BluetoothDevice device, int rssi, byte[] scanRecord)
+    {
         int startByte = 2;
         boolean patternFound = false;
-        while (startByte <= 5) {
-            if (((int) scanRecord[startByte + 2] & 0xff) == 0x02 && // Identifies   iBeacon
-                    ((int) scanRecord[startByte + 3] & 0xff) == 0x15) { // Identifies correct data length
+        while (startByte <= 5)
+        {
+            if (((int) scanRecord[startByte + 2] & 0xff) == 0x02 && ((int) scanRecord[startByte + 3] & 0xff) == 0x15)
+            {
                 patternFound = true;
                 break;
             }
             startByte++;
         }
 
-            byte[] uuidBytes = new byte[16];
-            System.arraycopy(scanRecord, startByte + 4, uuidBytes, 0, 16);
-            String hexString = bytesToHex(uuidBytes);
+        byte[] uuidBytes = new byte[16];
+        System.arraycopy(scanRecord, startByte + 4, uuidBytes, 0, 16);
+        String hexString = bytesToHex(uuidBytes);
 
-            String uuid = hexString.substring(0, 8) + "-"
-                    + hexString.substring(8, 12) + "-"
-                    + hexString.substring(12, 16) + "-"
-                    + hexString.substring(16, 20) + "-"
-                    + hexString.substring(20, 32);
-
-
-            int major = (scanRecord[startByte + 20] & 0xff) * 0x100
-                    + (scanRecord[startByte + 21] & 0xff);
+        String uuid = hexString.substring(0, 8) + "-"
+                + hexString.substring(8, 12) + "-"
+                + hexString.substring(12, 16) + "-"
+                + hexString.substring(16, 20) + "-"
+                + hexString.substring(20, 32);
 
 
-            int minor = (scanRecord[startByte + 22] & 0xff) * 0x100
-                    + (scanRecord[startByte + 23] & 0xff);
+        int major = (scanRecord[startByte + 20] & 0xff) * 0x100
+                + (scanRecord[startByte + 21] & 0xff);
 
-            String ibeaconName = device.getName();
-            String mac = device.getAddress();
-            int txPower = (scanRecord[startByte + 24]);
 
-            BluetoothSensor beacon = new BluetoothSensor(ibeaconName, uuid,mac,major+"",minor+"",rssi,txPower);
+        int minor = (scanRecord[startByte + 22] & 0xff) * 0x100
+                + (scanRecord[startByte + 23] & 0xff);
 
-            return  beacon;
+        String ibeaconName = device.getName();
+        String mac = device.getAddress();
+        int txPower = (scanRecord[startByte + 24]);
+
+        Beacon beacon = new Beacon(ibeaconName, uuid,mac,major+"",minor+"",rssi,txPower);
+
+        return  beacon;
 
     }
-    static final char[] hexArray = "0123456789ABCDEF".toCharArray();
-    private static String bytesToHex(byte[] bytes) {
+
+    private static String bytesToHex(byte[] bytes)
+    {
         char[] hexChars = new char[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
+        for (int j = 0; j < bytes.length; j++)
+        {
             int v = bytes[j] & 0xFF;
             hexChars[j * 2] = hexArray[v >>> 4];
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
@@ -206,13 +195,15 @@ public class Tools extends  Activity {
         return new String(hexChars);
     }
 
-    public static BluetoothSensor getSensorByMajorandMinor(String major ,String minor){
-        BluetoothSensor  max_sensor=null;
-        Iterator<String> keyite =  GlabalData.blutoothSensorList.keySet().iterator();
-        while (keyite.hasNext()){
+    public static Beacon getSensorByMajorandMinor(String major ,String minor){
+        Beacon max_sensor=null;
+        Iterator<String> keyite =  GlobalData.beaconlist.keySet().iterator();
+        while (keyite.hasNext())
+        {
             String key = keyite.next();
-            BluetoothSensor sensor = GlabalData.blutoothSensorList.get(key);
-            if (sensor.major.equals(major)&&sensor.minor.equals(minor)){
+            Beacon sensor = GlobalData.beaconlist.get(key);
+            if (sensor.major.equals(major)&&sensor.minor.equals(minor))
+            {
                 max_sensor = sensor;
             }
         }
@@ -220,30 +211,23 @@ public class Tools extends  Activity {
     }
 
 
-    public static BluetoothSensor getMaxRssiSensor(Hashtable<String, BluetoothSensor> list){
-        BluetoothSensor  max_sensor=null;
-        String max_key;
+    public static Beacon getMaxRssiSensor(Hashtable<String, Beacon> list)
+    {
+        Beacon max_sensor=null;
         int max_rssi=-10000;
-      Iterator<String> keyite =  list.keySet().iterator();
-        while (keyite.hasNext()){
+
+        Iterator<String> keyite =  list.keySet().iterator();
+        while (keyite.hasNext())
+        {
             String key = keyite.next();
-            BluetoothSensor sensor = list.get(key);
-            if (sensor.rssi > max_rssi){
+            Beacon sensor = list.get(key);
+            if (sensor.rssi > max_rssi)
+            {
                 max_rssi = sensor.rssi;
                 max_sensor = sensor;
             }
         }
         return  max_sensor;
-    }
-
-
-    public static  void printList(){
-        Iterator<String> keyite =  GlabalData.blutoothSensorList.keySet().iterator();
-        while (keyite.hasNext()){
-            String key = keyite.next();
-            BluetoothSensor sensor = GlabalData.blutoothSensorList.get(key);
-          //  Log.e("printList",)
-        }
     }
 
 }

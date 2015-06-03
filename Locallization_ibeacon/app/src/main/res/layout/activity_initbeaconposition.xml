@@ -64,35 +64,49 @@
             </LinearLayout>
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:text="-"
                 android:id="@+id/BT_Sub"
                 android:layout_row="1"
                 android:layout_column="4" />
 
+            <RadioGroup android:layout_column="0"
+                android:layout_row="0"
+                android:orientation="horizontal"
+                android:layout_gravity="center_vertical|fill"
+                android:gravity="center">
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="curr"
+                    android:id="@+id/RB_Curr"
+
+                    android:checked="false" />
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="max"
+                    android:id="@+id/RB_Max"
+                    android:checked="true"
+                />
+            </RadioGroup>
+
+
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="80dp"
                 android:layout_height="wrap_content"
-                android:text="calibrate"
+                android:text="cal"
                 android:id="@+id/BT_Calibreate"
                 android:layout_row="0"
-                android:layout_column="0"
-                android:layout_gravity="fill_horizontal" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="SetConf"
-                android:id="@+id/BT_SetConf"
                 android:layout_column="1"
-                android:layout_row="0"
                 android:layout_gravity="fill_horizontal" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="80dp"
                 android:layout_height="wrap_content"
-                android:text="Delete"
+                android:text="Del"
                 android:id="@+id/BT_DELETE"
                 android:layout_column="2"
                 android:layout_row="0"
@@ -108,7 +122,7 @@
                 android:layout_row="0" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:text="+"
                 android:id="@+id/BT_Pluse"

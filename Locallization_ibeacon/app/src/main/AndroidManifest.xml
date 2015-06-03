@@ -40,7 +40,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.Get_LanLng_Activity"
+            android:name=".activity.InitBeaconPositionActivity"
             android:label="@string/title_activity_get__lan_lng_" >
         </activity>
         <activity

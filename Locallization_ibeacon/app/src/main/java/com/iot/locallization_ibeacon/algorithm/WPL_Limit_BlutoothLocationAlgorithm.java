@@ -5,8 +5,8 @@ import android.os.Message;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.iot.locallization_ibeacon.activity.DemoActivity;
-import com.iot.locallization_ibeacon.pojo.BluetoothSensor;
-import com.iot.locallization_ibeacon.pojo.GlabalData;
+import com.iot.locallization_ibeacon.pojo.Beacon;
+import com.iot.locallization_ibeacon.pojo.GlobalData;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,7 +29,7 @@ public class WPL_Limit_BlutoothLocationAlgorithm extends BluetoothLocalizationAl
 			Double sumDef=0.0;
 			double x= 0;
 			double y =0;
-			List<BluetoothSensor> sensorList = SortWifiSignal();
+			List<Beacon> sensorList = SortWifiSignal();
 			DemoActivity.logstring =" minor:"+sensorList.get(0).minor+"rssi:"+(sensorList.get(0).rssi-sensorList.get(0).max_rssi)+" ";
 			DemoActivity.logstring +=" minor:"+sensorList.get(1).minor+"rssi:"+(sensorList.get(1).rssi-sensorList.get(1).max_rssi)+" ";
 			DemoActivity.logstring +=" minor:"+sensorList.get(2).minor+"rssi:"+(sensorList.get(2).rssi-sensorList.get(2).max_rssi)+"";
@@ -47,7 +47,7 @@ public class WPL_Limit_BlutoothLocationAlgorithm extends BluetoothLocalizationAl
 			}
 			
 			for (int i = 0; i < len; i++) {
-				BluetoothSensor sensor = sensorList.get(i);
+				Beacon sensor = sensorList.get(i);
 
 				if (sensor.rssi <= -100)
 					continue;
@@ -64,7 +64,7 @@ public class WPL_Limit_BlutoothLocationAlgorithm extends BluetoothLocalizationAl
 			}
 			x = x / sumDef;
 			y = y / sumDef;
-			GlabalData.currentPosition = new LatLng(x,y);
+			GlobalData.currentPosition = new LatLng(x,y);
 
 			Date time = new Date();
 			for (int i = 0 ; i< sensorList.size()  ;i++)
@@ -76,13 +76,13 @@ public class WPL_Limit_BlutoothLocationAlgorithm extends BluetoothLocalizationAl
 
 		}
 	
-	private List<BluetoothSensor> SortWifiSignal()
+	private List<Beacon> SortWifiSignal()
 	{
-		List<BluetoothSensor> signalList = new ArrayList<BluetoothSensor>();
-		Iterator<Entry<String, BluetoothSensor>> iter = GlabalData.blutoothSensorList.entrySet().iterator();
+		List<Beacon> signalList = new ArrayList<Beacon>();
+		Iterator<Entry<String, Beacon>> iter = GlobalData.beaconlist.entrySet().iterator();
 		while (iter.hasNext()) {
-			Entry<String, BluetoothSensor> entry = (Entry<String, BluetoothSensor>) iter.next();
-			BluetoothSensor sensor = entry.getValue();
+			Entry<String, Beacon> entry = (Entry<String, Beacon>) iter.next();
+			Beacon sensor = entry.getValue();
 			signalList.add(sensor);
 		}
 		
@@ -92,7 +92,7 @@ public class WPL_Limit_BlutoothLocationAlgorithm extends BluetoothLocalizationAl
 				int rssi_j=signalList.get(j).rssi-signalList.get(j).max_rssi;
 				if (rssi_i<rssi_j)
 				{
-					BluetoothSensor s=signalList.remove(j);
+					Beacon s=signalList.remove(j);
 					signalList.add(i, s);
 				}
 			}
