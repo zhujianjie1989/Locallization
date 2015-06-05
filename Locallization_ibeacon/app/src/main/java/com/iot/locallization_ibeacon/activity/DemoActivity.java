@@ -1,12 +1,18 @@
 package com.iot.locallization_ibeacon.activity;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.view.View;
-import android.widget.Button;
+import android.provider.Settings;
+import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -16,6 +22,7 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.iot.locallization_ibeacon.R;
@@ -24,6 +31,7 @@ import com.iot.locallization_ibeacon.pojo.GlobalData;
 import com.iot.locallization_ibeacon.tools.Tools;
 
 import java.io.File;
+import java.util.Date;
 
 
 public class DemoActivity extends Activity {
@@ -37,14 +45,16 @@ public class DemoActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_demo);
+        GlobalData.loghandler = updatelog ;
         initMap();
-        init_Button();
-
+        openGPSSettings();
+        changeBuildingMap();
     }
 
     private void changeBuildingMap()
     {
         BitmapDescriptor img =null;
+        Log.e("changeBuildingMap"," floor = "+GlobalData.curr_floor);
         switch(GlobalData.curr_floor)
         {
             case 1:
@@ -70,17 +80,69 @@ public class DemoActivity extends Activity {
 
     private void updateMap()
     {
-        changeBuildingMap();
+        Date date = new Date();
+        if (Math.abs(date.getTime() - GlobalData.IPS_UpdateTime.getTime()) >  6000)
+        {
+            GlobalData.IPS_flag = false;
+            return;
+        }
+
         location.setHandler(updatelog);
         location.DoLocalization();
+        updateLocation(GlobalData.currentPosition);
 
+    }
+    public void updateLocation(LatLng location){
         if (currmark!= null)
         {
             currmark.remove();
         }
-        currmark=map.addMarker(new MarkerOptions().position(GlobalData.currentPosition));
+        currmark=map.addMarker(new MarkerOptions().position(location));
+       // currmark=map.addMarker(new MarkerOptions().position(GlobalData.currentPosition));
     }
+    private void openGPSSettings() {
 
+        LocationManager alm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        if (alm.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
+            LocationManager locationManager;
+            locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+            locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 2000, 0, new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    if (GlobalData.IPS_flag == false) {
+                        updateLocation(new LatLng(location.getLatitude(), location.getLongitude()));
+                        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18);
+                        map.animateCamera(update);
+                    }
+
+                }
+
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                }
+
+                @Override
+                public void onProviderEnabled(String provider) {
+
+                }
+
+                @Override
+                public void onProviderDisabled(String provider) {
+
+                }
+            });
+            return;
+
+        }
+
+        Toast.makeText(this, "请开启GPS！", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
+        startActivityForResult(intent,0); //此为设置完成后返回到获取界面
+
+
+    }
     private void  initMap()
     {
 
@@ -105,38 +167,7 @@ public class DemoActivity extends Activity {
         updateHandler.postDelayed(updateMap, 1000);
     }
 
-    private void  init_Button()
-    {
-        final Button scan = (Button)findViewById(R.id.BT_scan);
-        Button stop = (Button)findViewById(R.id.BT_stop);
 
-        scan.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-
-                if (!scan_flag){
-
-                }
-                scan_flag=true;
-            }
-        });
-
-        stop.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                if (scan_flag){
-
-                }
-                scan_flag=false;
-
-            }
-        });
-
-    }
     private Runnable updateMap = new Runnable()
     {
         @Override
@@ -147,6 +178,8 @@ public class DemoActivity extends Activity {
         }
     };
 
+
+    private int count = 0;
     Handler updateHandler = new Handler()
     {
         @Override
@@ -166,7 +199,7 @@ public class DemoActivity extends Activity {
         public void handleMessage(Message msg)
         {
 
-            if (msg.arg1==2)
+            if (msg.arg1 == 2)
             {
                 changeBuildingMap();
             }

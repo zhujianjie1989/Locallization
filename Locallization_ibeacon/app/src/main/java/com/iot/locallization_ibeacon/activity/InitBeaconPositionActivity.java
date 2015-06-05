@@ -54,7 +54,7 @@ public class InitBeaconPositionActivity extends ActionBarActivity {
         initButton();
         initMap();
 
-
+        getSupportActionBar().hide();
         task = new TimerTask() {
             @Override
             public void run() {
@@ -183,8 +183,11 @@ private void changeImage(){
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                markerList.remove(marker.getTitle());
-                marker.remove();
+                if (marker !=null){
+                    markerList.remove(marker.getTitle());
+                    marker.remove();
+                }
+
                 saveConfig();
 
             }
@@ -328,30 +331,15 @@ private void changeImage(){
         map.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
             public void onMarkerDragStart(Marker marker) {
-                TextView lat = (TextView) findViewById(R.id.TV_Lat);
-                TextView lng = (TextView) findViewById(R.id.TV_Lng);
-                lat.setText(Tools.formatFloat(marker.getPosition().latitude) + "");
-                lng.setText(Tools.formatFloat(marker.getPosition().longitude) + "");
-
-
             }
 
             @Override
             public void onMarkerDrag(Marker marker) {
-                TextView lat = (TextView) findViewById(R.id.TV_Lat);
-                TextView lng = (TextView) findViewById(R.id.TV_Lng);
-                lat.setText(Tools.formatFloat(marker.getPosition().latitude) + "");
-                lng.setText(Tools.formatFloat(marker.getPosition().longitude) + "");
 
             }
 
             @Override
             public void onMarkerDragEnd(Marker marker) {
-                TextView lat = (TextView) findViewById(R.id.TV_Lat);
-                TextView lng = (TextView) findViewById(R.id.TV_Lng);
-                lat.setText(Tools.formatFloat(marker.getPosition().latitude) + "");
-                lng.setText(Tools.formatFloat(marker.getPosition().longitude) + "");
-
 
                 marker.setSnippet("x:" + Tools.formatFloat(marker.getPosition().latitude) + " y:" + Tools.formatFloat(marker.getPosition().longitude)
                         + "\n max_rssi:" + markerList.get(marker.getTitle()).max_rssi);

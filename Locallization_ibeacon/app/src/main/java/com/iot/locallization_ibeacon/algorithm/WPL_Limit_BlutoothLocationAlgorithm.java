@@ -70,7 +70,7 @@ public class WPL_Limit_BlutoothLocationAlgorithm extends BluetoothLocalizationAl
 			for (int i = 0 ; i< sensorList.size()  ;i++)
 			{
 				//Log.e("timeeeee",sensorList.get(i).minor+"   "+(time.getTime()-sensorList.get(i).updateTime.getTime())/1000+"");
-				if ((time.getTime()-sensorList.get(i).updateTime)/1000 > 6)
+				if ((time.getTime()-sensorList.get(i).updateTime)/1000 > 4)
 					sensorList.get(i).rssi = -150;
 			}
 

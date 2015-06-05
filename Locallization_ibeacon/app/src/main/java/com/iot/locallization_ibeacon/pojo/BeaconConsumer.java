@@ -23,9 +23,17 @@ public class BeaconConsumer
         {
             Log.e("lescon", beacon.major + "  " + beacon.minor + "  " + beacon.rssi + " floor : "+ GlobalData.curr_floor );
 
+
+
             Beacon sensor = GlobalData.beaconlist.get("major:"+beacon.major+" minor:"+beacon.minor);
             sensor.setRssi(beacon.rssi);
             sensor.updateTime = new Date().getTime();
+
+            if ((sensor.rssi - sensor.max_rssi) > -27){
+                GlobalData.IPS_flag = true;
+                GlobalData.IPS_UpdateTime = new Date();
+            }
+
 
             if (GlobalData.curr_floor != sensor.floor && (sensor.rssi - sensor.max_rssi) > -27 )
             {
