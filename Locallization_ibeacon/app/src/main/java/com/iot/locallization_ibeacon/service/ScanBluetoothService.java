@@ -95,7 +95,7 @@ public class ScanBluetoothService extends Service {
             }
         };
         timer = new Timer();
-        timer.schedule(task, 1000, 1000);
+        timer.schedule(task, 1000, 800);
     }
 
     public static  void stopTimer()
