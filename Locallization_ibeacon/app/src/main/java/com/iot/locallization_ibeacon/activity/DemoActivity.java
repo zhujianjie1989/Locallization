@@ -47,14 +47,14 @@ public class DemoActivity extends Activity {
         setContentView(R.layout.activity_demo);
         GlobalData.loghandler = updatelog ;
         initMap();
-
+        openGPSSettings();
         changeBuildingMap();
     }
 
     private void changeBuildingMap()
     {
         BitmapDescriptor img =null;
-        Log.e("changeBuildingMap", " floor = " + GlobalData.curr_floor);
+        Log.e("changeBuildingMap"," floor = "+GlobalData.curr_floor);
         switch(GlobalData.curr_floor)
         {
             case 1:
@@ -83,13 +83,8 @@ public class DemoActivity extends Activity {
         Date date = new Date();
         if (Math.abs(date.getTime() - GlobalData.IPS_UpdateTime.getTime()) >  6000)
         {
-            openGPSSettings();
+            GlobalData.IPS_flag = false;
             return;
-        }
-
-        if(locationManager!=null ){
-            locationManager.removeUpdates(GPSlistener);
-            locationManager = null;
         }
 
         location.setHandler(updatelog);
@@ -105,17 +100,39 @@ public class DemoActivity extends Activity {
         currmark=map.addMarker(new MarkerOptions().position(location));
        // currmark=map.addMarker(new MarkerOptions().position(GlobalData.currentPosition));
     }
-
-    private Location currentLocation =null;
-    LocationManager locationManager;
     private void openGPSSettings() {
 
         LocationManager alm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if (alm.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
-
+            LocationManager locationManager;
             locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
-            locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 2000, 0, GPSlistener);
+            locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 2000, 0, new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    if (GlobalData.IPS_flag == false) {
+                        updateLocation(new LatLng(location.getLatitude(), location.getLongitude()));
+                        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18);
+                        map.animateCamera(update);
+                    }
+
+                }
+
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                }
+
+                @Override
+                public void onProviderEnabled(String provider) {
+
+                }
+
+                @Override
+                public void onProviderDisabled(String provider) {
+
+                }
+            });
             return;
 
         }
@@ -126,55 +143,6 @@ public class DemoActivity extends Activity {
 
 
     }
-
-    LocationListener GPSlistener =  new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-
-            if(currentLocation!=null){
-                if(Tools.isBetterLocation(location, currentLocation)){
-                    Log.v("GPSTEST", "It's a better location");
-                    currentLocation=location;
-                    updateLocation(new LatLng(location.getLatitude(), location.getLongitude()));
-                }
-                else{
-                    Log.v("GPSTEST", "Not very good!");
-                }
-            }
-            else if(location.getAccuracy() < 5)
-            {
-                Log.v("GPSTEST", "It's first location");
-                currentLocation=location;
-                updateLocation(new LatLng(location.getLatitude(), location.getLongitude()));
-            }
-
-                /*    if (Tools.CalDistatce(new LatLng(location.getLatitude(), location.getLongitude()), GlobalData.currentPosition) > 15) {
-                       return;
-                    }
-                    updateLocation(new LatLng(location.getLatitude(), location.getLongitude()));*/
-                   /* CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18);
-                    map.animateCamera(update);*/
-
-
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-
-        }
-    };
-
-
     private void  initMap()
     {
 
